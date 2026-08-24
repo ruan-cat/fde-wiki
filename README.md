@@ -68,13 +68,17 @@ pnpm preview     # 本地预览构建产物
 
 `base` 由 workflow 的 `VITEPRESS_BASE` 控制(根站点为 `/`,项目页为 `/<repo>/`)。仓库 Settings → Pages → Source = GitHub Actions。
 
-### Vercel(零配置)
+### Vercel（仓库已配置）
 
 ```bash
-pnpm dlx vercel # Framework=VitePress, Build=pnpm build, Output=docs/.vitepress/dist
+pnpm dlx vercel
 ```
 
-`base` 默认 `/`。
+根目录 `vercel.json` 已固定 VitePress 框架、`pnpm build` 构建命令与 `docs/.vitepress/dist` 输出目录；首次执行命令时按提示关联或新建 Vercel Project。`base` 默认 `/`，适用于 Vercel。
+
+### LLM 文档索引
+
+构建已接入 `vitepress-plugin-llms`，会生成 `/llms.txt`、`/llms-full.txt` 与逐页的 LLM 友好 Markdown，供 AI 工具读取站点内容。GitHub Pages 项目页会写入上游绝对链接，Vercel 保持根路径链接。
 
 ### Netlify
 
@@ -87,20 +91,24 @@ pnpm dlx vercel # Framework=VitePress, Build=pnpm build, Output=docs/.vitepress/
 fde-wiki/
 ├─ source/                       # 原始报告(只读,自包含)
 ├─ scripts/split.mjs             # 拆分 + 交叉链接 + 标签 + 导语页 + 公司索引 + 术语表
+├─ vercel.json                    # Vercel：VitePress 构建命令与静态产物目录
 ├─ docs/
 │  ├─ index.md ch01–ch23.md topic01–62.md part1–4.md tags.md companies.md appendix.md
 │  ├─ .meta/tags.json            # 标签数据
+│  ├─ public/favicon.svg          # 浏览器图标（Wiki + 工程落地路径）
 │  └─ .vitepress/
-│     ├─ config.mjs              # 站点配置(中文搜索分词 / base / 主题)
-│     ├─ generated.mjs           # 自动生成的 sidebar + nav
-│     └─ theme/{index.js,custom.css}  # 阅读增强组件 + 标签/公司徽章样式
-└─ .github/workflows/deploy.yml  # GitHub Pages CI
+│     ├─ config.ts               # 站点配置(中文搜索分词 / base / 主题)
+│     ├─ generated.ts            # 自动生成的 sidebar + nav
+│     └─ theme/{index.ts,custom.css}  # 阅读增强组件 + 标签/公司徽章样式
+└─ .github/workflows/deploy.yml  # GitHub Pages：构建并部署 docs/.vitepress/dist
 ```
 
 ## 🛠 技术栈
 
 - [VitePress](https://vitepress.dev) 1.6 — 静态站点生成
 - MiniSearch — 本地全文搜索(CJK 分词定制)
+- @nolebase/vitepress-plugin-enhanced-readabilities — 阅读布局与聚光灯增强
+- vitepress-plugin-llms — LLM 友好文档索引与聚合产物
 - 纯前端,无后端、无数据库
 
 ---
