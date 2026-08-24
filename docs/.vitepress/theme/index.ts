@@ -1,11 +1,20 @@
 import DefaultTheme from 'vitepress/theme';
+import type { Theme } from 'vitepress';
+import type { Component } from 'vue';
 import { useData } from 'vitepress';
 import { h, ref, onMounted, onBeforeUnmount } from 'vue';
+import {
+  NolebaseEnhancedReadabilitiesMenu,
+  NolebaseEnhancedReadabilitiesScreenMenu
+} from '@nolebase/vitepress-plugin-enhanced-readabilities/client';
+import '@nolebase/vitepress-plugin-enhanced-readabilities/client/style.css';
 import './custom.css';
-import { readOrder, pageMeta } from '../generated.mjs';
+import { readOrder, pageMeta } from '../generated';
 
 // 标签 → 类别映射（与受控词表一致）。未命中的归 other。
-const TAG_CAT = {
+type TagCategory = 'industry' | 'tech' | 'method' | 'skill' | 'angle' | 'other';
+
+const TAG_CAT: Record<string, TagCategory> = {
   // 行业
   '金融': 'industry', '医疗': 'industry', '制造': 'industry', '政务': 'industry',
   '零售电商': 'industry', '物流供应链': 'industry', '能源': 'industry', '电信媒体': 'industry',
@@ -26,19 +35,22 @@ const TAG_CAT = {
   // 视角
   '中国市场': 'angle', '海外模式': 'angle', '行业大模型': 'angle', '工具箱': 'angle'
 };
-const catOf = (t) => TAG_CAT[t] || 'other';
+const catOf = (tag: string): TagCategory => TAG_CAT[tag] || 'other';
 // 标签 slug(与 scripts/split.mjs 的 slugifyTag 一致,确保页顶徽章跳转到 /tags 的标题锚点)
-const slugifyTag = (s) => s.toLowerCase().replace(/ +/g, '-').replace(/[^a-z0-9一-鿿-]/g, '');
+const slugifyTag = (tag: string) => tag.toLowerCase().replace(/ +/g, '-').replace(/[^a-z0-9一-鿿-]/g, '');
 
 // 当前页 slug(从 page.relativePath 推导,如 'ch01.md' → 'ch01','index.md' → '')
-const curSlug = (page) => (page.value.relativePath || '').replace(/\.md$/, '').replace(/\/index$/, '');
+const curSlug = (page: { value: { relativePath?: string } }) =>
+  (page.value.relativePath || '').replace(/\.md$/, '').replace(/\/index$/, '');
 
 // 读取 frontmatter.tags,在正文上方渲染 #标签 徽章(按类别配色),点击跳 /tags。
-const TagBadges = {
+const TagBadges: Component = {
   setup() {
     const { frontmatter } = useData();
     return () => {
-      const tags = frontmatter.value.tags;
+      const tags = Array.isArray(frontmatter.value.tags)
+        ? frontmatter.value.tags.filter((tag): tag is string => typeof tag === 'string')
+        : [];
       if (!tags || !tags.length) return null;
       return h(
         'div',
@@ -52,7 +64,7 @@ const TagBadges = {
 };
 
 // ---------- 面包屑:篇 › 当前页 ----------
-const Breadcrumb = {
+const Breadcrumb: Component = {
   setup() {
     const { page } = useData();
     return () => {
@@ -68,7 +80,7 @@ const Breadcrumb = {
 };
 
 // ---------- 阅读时间:前端按字数估算 ----------
-const ReadingTime = {
+const ReadingTime: Component = {
   setup() {
     const { page } = useData();
     const mins = ref(0);
@@ -86,7 +98,7 @@ const ReadingTime = {
 };
 
 // ---------- 上一篇 / 下一篇 ----------
-const PrevNext = {
+const PrevNext: Component = {
   setup() {
     const { page } = useData();
     const link = (s) => (s === '' ? '/' : '/' + s);
@@ -105,7 +117,7 @@ const PrevNext = {
 };
 
 // ---------- 阅读进度条(顶部)----------
-const ReadingProgress = {
+const ReadingProgress: Component = {
   setup() {
     const pct = ref(0);
     const onScroll = () => {
@@ -120,7 +132,7 @@ const ReadingProgress = {
 };
 
 // ---------- 返回顶部 ----------
-const BackToTop = {
+const BackToTop: Component = {
   setup() {
     const show = ref(false);
     const onScroll = () => { show.value = window.scrollY > 500; };
@@ -135,7 +147,7 @@ const BackToTop = {
 };
 
 // ---------- 字号记忆(localStorage)----------
-const FontSize = {
+const FontSize: Component = {
   setup() {
     const size = ref(16);
     const apply = (n) => { document.documentElement.style.setProperty('--vp-doc-font-size', n + 'px'); };
@@ -156,7 +168,7 @@ const FontSize = {
   }
 };
 
-export default {
+const theme: Theme = {
   extends: DefaultTheme,
   Layout: () =>
     h('div', { class: 'layout-wrapper' }, [
@@ -164,8 +176,11 @@ export default {
       h(DefaultTheme.Layout, null, {
         'doc-before': () => h('div', { class: 'doc-prelude' }, [h(Breadcrumb), h(ReadingTime), h(TagBadges)]),
         'doc-after': () => h(PrevNext),
-        'nav-bar-content-before': () => h(FontSize)
+        'nav-bar-content-before': () => [h(FontSize), h(NolebaseEnhancedReadabilitiesMenu)],
+        'nav-screen-content-after': () => h(NolebaseEnhancedReadabilitiesScreenMenu)
       }),
       h(BackToTop)
     ])
 };
+
+export default theme;

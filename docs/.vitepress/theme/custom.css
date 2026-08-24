@@ -149,3 +149,6 @@ abbr.term {
   color: var(--vp-c-brand-1);
   font-style: normal;
 }
+.VPSocialLinks.VPNavBarSocialLinks.social-links {
+  margin-right: 0;
+}

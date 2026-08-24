@@ -1,11 +1,13 @@
 import { defineConfig } from 'vitepress';
-import { sidebar, nav } from './generated.mjs';
+import llmstxt from 'vitepress-plugin-llms';
+import { sidebar, nav } from './generated';
 
-// 配置说明：sidebar / nav 由 scripts/split.mjs 自动生成到 generated.mjs
-// 改章节结构后，运行 `npm run split` 重新生成即可。
+// 配置说明：sidebar / nav 由 scripts/split.mjs 自动生成到 generated.ts
+// 改章节结构后，运行 `pnpm split` 重新生成即可。
 // 部署到子路径(如 GitHub Pages 项目页 https://<user>.github.io/<repo>/)时，
 // 设环境变量 VITEPRESS_BASE=/<repo>/；默认 '/' 适用于 Vercel / Netlify / 自定义域名。
 const base = process.env.VITEPRESS_BASE || '/';
+const llmsDomain = base === '/fde-wiki/' ? 'https://zhyese.github.io' : undefined;
 
 // ---------- 中文本地搜索分词 ----------
 // 问题：VitePress 本地搜索(MiniSearch)默认按空白/标点切词，中文连续字串会被当成
@@ -45,6 +47,24 @@ export default defineConfig({
   cleanUrls: true,
   ignoreDeadLinks: true,
   lastUpdated: false,
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]],
+
+  vite: {
+    optimizeDeps: {
+      exclude: [
+        '@nolebase/vitepress-plugin-enhanced-readabilities/client',
+        'vitepress',
+        '@nolebase/ui'
+      ]
+    },
+    ssr: {
+      noExternal: [
+        '@nolebase/vitepress-plugin-enhanced-readabilities',
+        '@nolebase/ui'
+      ]
+    },
+    plugins: [llmstxt({ domain: llmsDomain })]
+  },
 
   markdown: {
     lineNumbers: false,
@@ -95,6 +115,12 @@ export default defineConfig({
       copyright: 'FDE 调研报告 (2026)'
     },
 
-    socialLinks: []
+    socialLinks: [
+      {
+        icon: 'github',
+        link: 'https://github.com/zhyese/fde-wiki/',
+        ariaLabel: 'GitHub：zhyese/fde-wiki'
+      }
+    ]
   }
 });
