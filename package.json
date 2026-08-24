@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "FDE 全球市场与全行业落地调研报告 (2026) — VitePress wiki",
+  "homepage": "https://zhyese.github.io/fde-wiki/",
   "scripts": {
     "split": "node scripts/split.mjs",
     "dev": "vitepress dev docs",
