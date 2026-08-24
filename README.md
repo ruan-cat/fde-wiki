@@ -24,16 +24,17 @@
 ## 🚀 快速开始
 
 ```bash
-npm install
-npm run split    # 从 source/ 拆分生成 docs/*.md + 侧边栏/导航/索引(改内容后重跑)
-npm run dev      # 本地预览 http://localhost:5173
+corepack enable  # 首次使用时启用 package.json 固定的 pnpm 10.34.5
+pnpm install --frozen-lockfile
+pnpm split       # 从 source/ 拆分生成 docs/*.md + 侧边栏/导航/索引(改内容后重跑)
+pnpm dev         # 本地预览 http://localhost:5173
 ```
 
 构建生产版本:
 
 ```bash
-npm run build    # 产物在 docs/.vitepress/dist(纯静态)
-npm run preview  # 本地预览构建产物
+pnpm build       # 产物在 docs/.vitepress/dist(纯静态)
+pnpm preview     # 本地预览构建产物
 ```
 
 ## 📚 内容结构
@@ -51,8 +52,8 @@ npm run preview  # 本地预览构建产物
 
 1. 替换 `source/FDE全球市场与全行业落地调研报告_2026.md`(原文,只读)
 2. (可选)维护 `docs/.meta/tags.json` 标签数据
-3. 运行 `npm run split` — 自动重新生成全部页面、交叉链接、侧边栏、导语页、标签索引、公司索引、术语表
-4. `npm run build` 部署
+3. 运行 `pnpm split` — 自动重新生成全部页面、交叉链接、侧边栏、导语页、标签索引、公司索引、术语表
+4. `pnpm build` 部署
 
 ## 📦 部署
 
@@ -70,15 +71,14 @@ npm run preview  # 本地预览构建产物
 ### Vercel(零配置)
 
 ```bash
-npm i -g vercel
-vercel      # Framework=VitePress, Build=npm run build, Output=docs/.vitepress/dist
+pnpm dlx vercel # Framework=VitePress, Build=pnpm build, Output=docs/.vitepress/dist
 ```
 
 `base` 默认 `/`。
 
 ### Netlify
 
-- Build command: `npm run split && npm run build`
+- Build command: `pnpm split && pnpm build`
 - Publish directory: `docs/.vitepress/dist`
 
 ## 🗂 项目结构
