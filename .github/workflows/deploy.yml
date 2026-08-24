@@ -25,16 +25,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
-      # 用 npm install 而非 npm ci：CI 的 node npm 与本地解析传递依赖(search-insights 等)不一致，
-      # npm ci 对 lock 完整性零容忍会失败；本站仅锁 vitepress，install 足够鲁棒。
-      - run: npm install --no-fund --no-audit
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      # 冻结锁文件，确保 CI 与本地使用相同的依赖解析结果。
+      - run: pnpm install --frozen-lockfile
       # base 由 job 级 env VITEPRESS_BASE 提供
-      - run: npm run split
-      - run: npm run build
+      - run: pnpm split
+      - run: pnpm build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
